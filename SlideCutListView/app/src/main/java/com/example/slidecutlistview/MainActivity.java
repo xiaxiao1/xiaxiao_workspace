@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -19,9 +15,8 @@ import com.example.slidecutlistview.SlideCutListView.RemoveDirection;
 import com.example.slidecutlistview.SlideCutListView.RemoveListener;
 
 public class MainActivity extends Activity implements RemoveListener{
-	public int  currentIndex=0;
 	private SlideCutListView slideCutListView ;
-	private MyArrayAdapter<String> adapter;
+	private ArrayAdapter<String> adapter;
 	private List<String> dataSourceList = new ArrayList<String>();
 
 	@Override
@@ -35,11 +30,11 @@ public class MainActivity extends Activity implements RemoveListener{
 		slideCutListView = (SlideCutListView) findViewById(R.id.slideCutListView);
 		slideCutListView.setRemoveListener(this);
 		
-		for(int i=0; i<200; i++){
-			dataSourceList.add("xiaxiao " + i);
+		for(int i=0; i<20; i++){
+			dataSourceList.add("»¬¶¯É¾³ý" + i); 
 		}
 		
-		adapter = new MyArrayAdapter<String>(this, R.layout.listview_item, R.id.list_item, dataSourceList);
+		adapter = new ArrayAdapter<String>(this, R.layout.listview_item, R.id.list_item, dataSourceList);
 		slideCutListView.setAdapter(adapter);
 		
 		slideCutListView.setOnItemClickListener(new OnItemClickListener() {
@@ -53,49 +48,25 @@ public class MainActivity extends Activity implements RemoveListener{
 	}
 
 	
-	//ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½Ö®ï¿½ï¿½Ä»Øµï¿½ï¿½ï¿½ï¿½ï¿½
+	//»¬¶¯É¾³ýÖ®ºóµÄ»Øµ÷·½·¨
 	@Override
 	public void removeItem(RemoveDirection direction, int position) {
-		currentIndex=position;
 		adapter.remove(adapter.getItem(position));
-
 		
 		
 		switch (direction) {
 		case RIGHT:
-			Toast.makeText(this, "ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½  "+ position, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "ÏòÓÒÉ¾³ý  "+ position, Toast.LENGTH_SHORT).show();
 			break;
 		case LEFT:
-			Toast.makeText(this, "ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½  "+ position, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Ïò×óÉ¾³ý  "+ position, Toast.LENGTH_SHORT).show();
 			break;
 
 		default:
 			break;
 		}
 		
-	}
+	}	
 
-
-	class MyArrayAdapter<T> extends ArrayAdapter<T> {
-		public MyArrayAdapter(Context context, int resource, int textViewResourceId, List<T>
-				objects) {
-			super(context, resource, textViewResourceId, objects);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v= super.getView(position, convertView, parent);
-			slide(position,v);
-			return v;
-		}
-	}
-
-	public void slide(int position,View v) {
-		if (position>=currentIndex) {
-			Animation animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.up);
-			v.startAnimation(animation);
-		}
-
-	}
 
 }

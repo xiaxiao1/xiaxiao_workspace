@@ -1,5 +1,0 @@
-CHANGED,F:\xiaxiao_workspace\SlideCutListView\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\android\tools\fd\runtime\AppPatchesLoaderImpl.class
-CHANGED,F:\xiaxiao_workspace\SlideCutListView\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\slidecutlistview\MainActivity$2$override.class
-CHANGED,F:\xiaxiao_workspace\SlideCutListView\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\slidecutlistview\MainActivity$1$override.class
-CHANGED,F:\xiaxiao_workspace\SlideCutListView\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\slidecutlistview\MainActivity$MyArrayAdapter$override.class
-CHANGED,F:\xiaxiao_workspace\SlideCutListView\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\example\slidecutlistview\MainActivity$override.class
