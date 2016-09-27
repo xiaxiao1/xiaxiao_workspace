@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onAnimationUpdate(ValueAnimator animation) {
                     int currentValue = (int) animation.getAnimatedValue();
                     Log.d("TAG", "cuurent value is a " + currentValue);
-                     clipDrawable.setLevel(currentValue);
+                     clipDrawable2.setLevel(currentValue);
                  }
                 });
                 animator.start();
