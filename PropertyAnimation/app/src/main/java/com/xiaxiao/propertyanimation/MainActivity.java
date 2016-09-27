@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     int currentValue = (int) animation.getAnimatedValue();
-                    Log.d("TAG", "cuurent value is " + currentValue);
+                    Log.d("TAG", "cuurent value is a " + currentValue);
                      clipDrawable.setLevel(currentValue);
                  }
                 });
