@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.xiaxiao.propertyanimation"
+<manifest package="com.viewdraghelper.xiaxiao.activityanimation"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name="com.xiaxiao.propertyanimation.MyApplication"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".MainActivity"
+                  android:theme="@style/AnimActivityTheme"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Activity2"/>
+        <activity android:name=".Activity2"
+                  android:theme="@style/AnimActivityTheme"
+            />
     </application>
 
 </manifest>

@@ -1,14 +1,19 @@
 package com.xiaxiao.propertyanimation;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.graphics.Interpolator;
 import android.graphics.drawable.ClipDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.CycleInterpolator;
@@ -16,6 +21,8 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.security.Policy;
 
 /**
  * 属性动画
@@ -30,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView img2;
     private ImageView img3;
     private ImageView img4;
+    private ImageView img44;
     ClipDrawable clipDrawable;
 
     @Override
@@ -44,10 +52,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn5).setOnClickListener(this);
         findViewById(R.id.btn6).setOnClickListener(this);
         findViewById(R.id.btn7).setOnClickListener(this);
+        findViewById(R.id.btn11).setOnClickListener(this);
+        findViewById(R.id.btn12).setOnClickListener(this);
+        findViewById(R.id.btn13).setOnClickListener(this);
+        findViewById(R.id.btn14).setOnClickListener(this);
+        findViewById(R.id.btn15).setOnClickListener(this);
+        findViewById(R.id.btn16).setOnClickListener(this);
+        findViewById(R.id.btn17).setOnClickListener(this);
+        findViewById(R.id.btn21).setOnClickListener(this);
+        findViewById(R.id.btn22).setOnClickListener(this);
+        findViewById(R.id.btn23).setOnClickListener(this);
+        findViewById(R.id.btn24).setOnClickListener(this);
+        findViewById(R.id.btn25).setOnClickListener(this);
+        findViewById(R.id.btn26).setOnClickListener(this);
+        findViewById(R.id.btn27).setOnClickListener(this);
         img1 = (ImageView) findViewById(R.id.img1);
         img2 = (ImageView) findViewById(R.id.img2);
         img3 = (ImageView) findViewById(R.id.img3);
         img4 = (ImageView) findViewById(R.id.img4);
+        img44 = (ImageView) findViewById(R.id.img44);
 //        clipDrawable=(ClipDrawable)img1.getDrawable();
     }
 
@@ -123,10 +146,88 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn6:
                 //TODO implement
-                Log.i("xx","hsadhsadhsiad");
+                /*Log.i("xx","hsadhsadhsiad");
                 Toast.makeText(this,MyApplication.getI()+"",Toast.LENGTH_SHORT).show();
+                ObjectAnimator o = ObjectAnimator.ofFloat(img2, "rotation", img2.getRotation(), img2.getRotation()+180);
+                o.setDuration(1000);
+                o.start();*/
+                img44.startAnimation(AnimationUtils.loadAnimation(this,R.anim.fly_ball));
                 break;
             case R.id.btn7:
+                //TODO implement
+               /* img4.setVisibility(View.GONE);
+                Animation a = AnimationUtils.loadAnimation(this, R.anim.y2);
+                img4.startAnimation(a);
+                img4.setVisibility(View.VISIBLE);*/
+                /*ObjectAnimator objectAnimator = ObjectAnimator.ofInt(img4, "height", img4
+                        .getHeight(), 0);
+
+                objectAnimator.setDuration(2000);
+                objectAnimator.start();*/
+               final ViewGroup.LayoutParams lp=img3.getLayoutParams();
+                final int width=img4.getWidth();
+                final int hei=img4.getHeight();
+                ValueAnimator va=ValueAnimator.ofInt(0,img4.getHeight());
+                va.setDuration(1000);
+                va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        lp.width=(int)animation.getAnimatedValue();
+                        /*lp.height=hei;*/
+                        img3.setLayoutParams(lp);
+                        Log.i("xx",lp.height+" "+lp.width);
+                    }
+                });
+                va.setRepeatCount(-1);
+                va.start();
+                /*lp.height=20;
+                lp.width=400;
+                img4.setLayoutParams(lp);*/
+
+                break;
+            case R.id.btn11:
+                //TODO implement
+                startActivity(new Intent(this,Activity2.class));
+                break;
+            case R.id.btn12:
+                //TODO implement
+                img4.animate().x(img4.getTranslationX()+100).y(100);
+                img4.di
+                break;
+            case R.id.btn13:
+                //TODO implement
+                break;
+            case R.id.btn14:
+                //TODO implement
+                break;
+            case R.id.btn15:
+                //TODO implement
+                break;
+            case R.id.btn16:
+                //TODO implement
+                break;
+            case R.id.btn17:
+                //TODO implement
+                break;
+            case R.id.btn21:
+                //TODO implement
+                break;
+            case R.id.btn22:
+                //TODO implement
+                break;
+            case R.id.btn23:
+                //TODO implement
+                break;
+            case R.id.btn24:
+                //TODO implement
+                break;
+            case R.id.btn25:
+                //TODO implement
+                break;
+            case R.id.btn26:
+                //TODO implement
+                break;
+            case R.id.btn27:
                 //TODO implement
                 break;
         }
