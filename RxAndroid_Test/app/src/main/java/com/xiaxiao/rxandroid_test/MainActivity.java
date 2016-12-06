@@ -28,7 +28,6 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -52,12 +51,78 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "lalala", Toast.LENGTH_SHORT).show();
-                function4();
+                function8();
             }
         });
 //        function3();
 
 
+    }
+    public void function8() {
+        int[] i=new int[]{1,2,3,4,5,6,7,8,9};
+        Observable.just(i)
+                .map(new Func1<int[], int[]>() {
+                    @Override
+                    public int[] call(int[] ints) {
+                        for (int u:ints) {
+                            if (u%2==0) {
+                                u=0;
+                            }
+                        }
+                        return ints;
+                    }
+
+                })
+                .map(new Func1<int[], String>() {
+                    @Override
+                    public String call(int[] ints) {
+                        String s="";
+                        for (int t:ints) {
+                            s=s+t;
+                        }
+                        return s;
+                    }
+
+                })
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.i("xx",s);
+                        tv.setText(s);
+
+                    }
+                });
+    }
+
+    public void function7(){
+        new HttpUtil.Builder()
+                .url("https://apis.lis99.com/activity/order_detail/")
+                .params("453143",19165)
+                .build()
+                .get()
+                //线程切换也封装起来了
+                .subscribe(new Subscriber<LSMyActivity>(){
+                    @Override
+                    public void onCompleted() {
+                        Log.i("xx","compelte");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.i("xx",e.toString());
+                    }
+
+                    @Override
+                    public void onNext(LSMyActivity lsMyActivity) {
+                        Log.i("xx",lsMyActivity.toString());
+                    }
+                });
+        /*new Action1<LSMyActivity>() {
+                    @Override
+                    public void call(LSMyActivity lsMyActivity) {
+                        Log.i("xx",lsMyActivity.toString());
+                    }
+                }*/
     }
 
     public void function6() {
@@ -66,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        RetrofitHelper retrofitHelper = retrofit.create(RetrofitHelper.class);
+        RetrofitService retrofitHelper = retrofit.create(RetrofitService.class);
         retrofitHelper.getClassifyBean()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -98,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 //retrofit和rxandroid之间存在版本匹配问题  一定要加下面这句
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        RetrofitHelper retrofitHelper = retrofit.create(RetrofitHelper.class);
+        RetrofitService retrofitHelper = retrofit.create(RetrofitService.class);
        final Call<String> call= retrofitHelper.getResult2("453143", 19165);
         new Thread(new Runnable() {
             @Override
@@ -112,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }){}.start();
 
+
     }
     public void function4() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -121,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 //retrofit和rxandroid之间存在版本匹配问题  一定要加下面这句
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        RetrofitHelper retrofitHelper = retrofit.create(RetrofitHelper.class);
+        RetrofitService retrofitHelper = retrofit.create(RetrofitService.class);
         retrofitHelper.getResult("453143",19165)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
