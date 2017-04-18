@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     int currentPage=0;
     int ListSize=0;
     int currentListSize=0;
+    int currentArticleIndex=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                work(0);
-                parseArticlepage("http://chuansong.me/n/1745724245630");
+                work(0);
+//                parseArticlepage("http://chuansong.me/n/1775574245332");
             }
         });
 
@@ -87,11 +88,7 @@ public class MainActivity extends AppCompatActivity {
                         message("完成第 "+currentListSize+" / "+ListSize+"  个");
                         checkListSize();
                     }
-                    /*for (int i=0;i<articles.size();i++) {
-                        if (articles.get(i)!=null) {
-                            Log.i("xx","item value:"+(i+1)+articles.get(i).toString());
-                        }
-                    }*/
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     checkListSize();
@@ -118,8 +115,8 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
                 try {
                     if (response==null||response.body()==null) {
-                        message("------------------------------------"+pageUrl+" 个页出错");
-//                        checkListSize();
+                        message("------------------------------------"+pageUrl+" 页出错");
+                        checkArticleList();
                         return;
                     }
                     String html=new String(response.body().bytes());
@@ -127,35 +124,31 @@ public class MainActivity extends AppCompatActivity {
                     ArticleInfo articleInfo = new ArticleInfo();
                     articleInfo.setUrl(pageUrl);
                     Document doc = Jsoup.parse(html);
-                    Elements elements=doc.select("div.rich_media_content").first().getElementsByTag("span");
+                    Elements elements=doc.select("div.rich_media_content").first().getElementsByAttributeValue("style","text-align: center;");
 
-                    for (Element e:elements) { //e 是span标签
-                        Element img=e.getElementsByTag("img").first();
-                        if (img!=null) {
-                            articleInfo.addInfoItem(img.attr("src"));
-                        } else if (e.text()!=null&&e.text().trim().length()!=0) {
-                            articleInfo.addInfoItem(e.text());
+                    for (Element e:elements) { //e 是p标签
+                        Elements imgs=e.getElementsByTag("img");
+                        Elements texts=e.getElementsByTag("span");
+                        for (Element text:texts) {
+                            if (text.text()!=null&&text.text().trim().length()!=0) {
+                                articleInfo.addInfoItem(text.text());
+                            }
+                        }
+                        if (!imgs.isEmpty()) {
+                            for (Element img:imgs) {
+                                articleInfo.addInfoItem(img.attr("src"));
+                            }
                         }
 
-//                        message(e.tagName());
-                        /*Article a = new Article();
-                        Element eName = e.select("a.question_link").first();
-                        Element eUrl = e.select("a.tb").first();
-                        a.setName(eName.text());
-                        String dtr=eUrl.attr("onclick");
-                        dtr = dtr.substring(dtr.indexOf("?url=") + 5, dtr.indexOf("&"));
-                        a.setUrl(dtr);
-                        articles.add(a);
-                        message("完成第 "+currentListSize+" / "+ListSize+"  个");
-                        checkListSize();*/
                     }
+                    checkArticleList();
                     List l = articleInfo.getDatas();
                     for (int i=0;i<l.size();i++) {
                         message(l.get(i).toString());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    checkListSize();
+                    checkArticleList();
 
                 }
 
@@ -183,11 +176,11 @@ public class MainActivity extends AppCompatActivity {
                     work(currentPage);
                 } else {
                     message("total over.");
-                    for (int i=0;i<articles.size();i++) {
-                        if (articles.get(i)!=null) {
-                            message((i+1)+articles.get(i).toString());
-                        }
-                    }
+                    message("start loading article info.");
+
+                    message("，，，，，，，，，，，，，开始解析第 "+currentArticleIndex+" / "+articles.size()+"  个文章");
+
+                    parseArticlepage(articles.get(0).getUrl());
                 }
             }
 
@@ -196,5 +189,21 @@ public class MainActivity extends AppCompatActivity {
 
     public void message(String mes) {
         Log.i("xx",mes);
+    }
+
+    public void checkArticleList() {
+        currentArticleIndex++;
+        if (currentArticleIndex < articles.size()) {
+            message("，，，，，，，，，，，，，开始解析第 "+currentArticleIndex+" / "+articles.size()+"  个文章");
+
+            parseArticlepage(articles.get(currentArticleIndex).getUrl());
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            message(" quan bu OKOKOK!");
+        }
     }
 }
