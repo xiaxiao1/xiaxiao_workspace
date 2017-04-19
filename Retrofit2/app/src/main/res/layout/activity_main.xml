@@ -9,13 +9,35 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.administrator.retrofit2.MainActivity">
-
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_alignParentTop="true"
+    >
+    <EditText
+        android:id="@+id/tv_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="start page"
+        android:layout_weight="1"
+        android:inputType="number"
+        />
+    <EditText
+        android:id="@+id/tv_end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="end page"
+        android:layout_weight="1"
+        android:inputType="number"
+        />
+</LinearLayout>
     <Button
         android:id="@+id/btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="gogogo"
         android:textSize="22sp"
+        android:layout_marginTop="40dp"
         />
     <TextView
         android:id="@+id/tv"

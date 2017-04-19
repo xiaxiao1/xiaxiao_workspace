@@ -1,8 +1,9 @@
 package com.example.administrator.retrofit2;
 
 import android.util.Log;
-import android.widget.TextView;
 
+import com.example.administrator.retrofit2.bean.Article;
+import com.example.administrator.retrofit2.thirdframework.retrofit.gitapi;
 import com.squareup.okhttp.ResponseBody;
 
 import org.jsoup.Jsoup;
@@ -12,7 +13,6 @@ import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 

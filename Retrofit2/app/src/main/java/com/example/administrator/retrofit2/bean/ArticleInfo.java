@@ -1,25 +1,29 @@
-package com.example.administrator.retrofit2;
+package com.example.administrator.retrofit2.bean;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import cn.bmob.v3.BmobObject;
 
 /**
  * Created by xiaxiao on 2017/4/18.
  */
 
-public class ArticleInfo {
+public class ArticleInfo extends BmobObject {
     String url;
     String title;
-    List<Object> datas;
+    List<String> datas;
+    Article article;
+    String contents;
 
     public ArticleInfo() {
         datas = new CopyOnWriteArrayList<>();
     }
-    public List<Object> getDatas() {
+    public List<String> getDatas() {
         return datas;
     }
 
-    public void setDatas(List<Object> datas) {
+    public void setDatas(List<String> datas) {
         this.datas = datas;
     }
 
@@ -39,8 +43,23 @@ public class ArticleInfo {
         this.url = url;
     }
 
+    public Article getArticle() {
+        return article;
+    }
 
-    public void addInfoItem(Object object) {
+    public void setArticle(Article article) {
+        this.article = article;
+    }
+
+    public String getContents() {
+        return contents;
+    }
+
+    public void setContents(String contents) {
+        this.contents = contents;
+    }
+
+    public void addInfoItem(String object) {
         this.datas.add(object);
     }
     @Override
