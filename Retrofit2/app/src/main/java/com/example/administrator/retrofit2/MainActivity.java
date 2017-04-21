@@ -47,6 +47,9 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
+    public int pieceSize;
+    int totalitems;
+    public int pieceNum=0;
     public RuntimePermissionsManager runtimePermissionsManager;
     List<Integer> errorPageIndex= new CopyOnWriteArrayList<>();
     List<Article> errorArticles= new CopyOnWriteArrayList<>();
@@ -101,7 +104,13 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });*/
-                queryArticles();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        queryArticles();
+                    }
+                }).start();
             }
         });
 
@@ -165,72 +174,83 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    Retrofit t_retrofit =new Retrofit.Builder().baseUrl(API).addConverterFactory(GsonConverterFactory.create()).build();
+    gitapi t_service = t_retrofit.create(gitapi.class);
     public void parseArticlepage(final Article article) {
         final String pageUrl=article.getUrl();
         message("-------------------------------------------------------------------------------正在处理 "+pageUrl);
-        Retrofit retrofit =new Retrofit.Builder().baseUrl(API).addConverterFactory(GsonConverterFactory.create()).build();
-        gitapi service = retrofit.create(gitapi.class);
-        Call<ResponseBody> model = service.profilePicture(pageUrl);
+
+        Call<ResponseBody> model = t_service.profilePicture(pageUrl);
         model.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
                 try {
                     if (response==null||response.body()==null) {
                         message("------------------------------------------------------------------"+pageUrl+" 页出错");
-                        errorArticles.add(article);
+//                        errorArticles.add(article);
 //                        checkArticleList();
+                        checkPieceSize();
                         return;
                     }
                     String html=new String(response.body().bytes());
 //                    tv.setText(html);
-                    ArticleInfo articleInfo = new ArticleInfo();
+                    /*ArticleInfo articleInfo = new ArticleInfo();
                     articleInfo.setArticle(article);
-                    articleInfo.setUrl(pageUrl);
+                    articleInfo.setUrl(pageUrl);*/
                     Document doc = Jsoup.parse(html);
                     Elements elements=doc.select("div.rich_media_content").first().getElementsByAttributeValue("style","text-align: center;");
                     if (elements.size()==0) {
                         elements=doc.select("div.rich_media_content").first().getElementsByTag("p");
                     }
 
+                    StringBuffer stringBuffer = new StringBuffer();
                     for (Element e:elements) { //e 是p标签
                         Elements imgs=e.getElementsByTag("img");
                         Elements texts=e.getElementsByTag("span");
                         for (Element text:texts) {
                             if (text.text()!=null&&text.text().trim().length()!=0) {
-                                articleInfo.addInfoItem(text.text());
+//                                articleInfo.addInfoItem(text.text());
+                                stringBuffer.append(text.text());
+                                stringBuffer.append("####");
                             }
                         }
                         if (!imgs.isEmpty()) {
                             for (Element img:imgs) {
-                                articleInfo.addInfoItem(img.attr("src"));
+//                                articleInfo.addInfoItem(img.attr("src"));
+                                stringBuffer.append(img.attr("src"));
+                                stringBuffer.append("####");
                             }
                         }
 
                     }
-                    List l = articleInfo.getDatas();
-                    StringBuffer stringBuffer = new StringBuffer();
-                    for (int i=0;i<l.size();i++) {
-                        String item=(String)l.get(i);
-                        stringBuffer.append(item);
-                        stringBuffer.append("####");
-                        message(item);
-                    }
-                    articleInfo.setContents(stringBuffer.toString());
-                    bmobServer.addArticleInfo(articleInfo, new BmobListener() {
+//                    List l = articleInfo.getDatas();
+//
+//                    for (int i=0;i<l.size();i++) {
+//                        String item=(String)l.get(i);
+//                        stringBuffer.append(item);
+//                        stringBuffer.append("####");
+////                        message(item);
+//                    }
+//                    articleInfo.setContents(stringBuffer.toString());
+                    message("解析文章内容完成，开始存入bmob");
+                    article.setContents(stringBuffer.toString());
+                    bmobServer.updateArticle(article, new BmobListener() {
                         @Override
                         public void onSuccess(Object object) {
-                            message("save 2 bmob article info OK!");
+                            message("文章存入bmob成功，");
+                            checkPieceSize();
                         }
 
                         @Override
                         public void onError(BmobException e) {
-
+                            checkPieceSize();
                         }
                     });
 //                    checkArticleList();
                 } catch (IOException e) {
                     e.printStackTrace();
 //                    checkArticleList();
+                    checkPieceSize();
 
                 }
 
@@ -241,7 +261,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("xx",""+t.getMessage());
 //                currentListSize=ListSize-1;
 //                checkArticleList();
-                errorArticles.add(article);
+//                errorArticles.add(article);
+                checkPieceSize();
             }
         });
     }
@@ -432,28 +453,56 @@ public class MainActivity extends AppCompatActivity {
         }
         return runtimePermissionsManager;
     }
-
+    List<Article> alist;
     public void queryArticles() {
-        bmobServer.getArticles(new BmobListener() {
+        message("----------------------------------------------------------------------请求文章列表 "+pieceNum);
+        bmobServer.getArticles(pieceNum,new BmobListener() {
             @Override
             public void onSuccess(Object object) {
-                List<Article> list=(List<Article>)object;
-                for (int i=0;i<list.size();i++) {
-//                    message(list.get(i).toString());
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                alist=(List<Article>)object;
+                List<Article> tempList=(List<Article>)object;
+                for (Article f:alist) {
+                    if (f.getContents()!=null) {
+                        tempList.add(f);
                     }
+                }
+                alist=tempList;
+                pieceSize=alist.size();
+                if (alist.size()==0) {
+                    message("---------------------------------------------------------------本次结束 ，共操作条数"+totalitems);
+                    ring(true);
+                    return;
+                }
+                totalitems=totalitems+pieceSize;
+                message("---------------------------------------------------------------请求成功，开始解析文章内容");
+                for (int i=0;i<alist.size();i++) {
+//                    message(list.get(i).toString());
 
-                    parseArticlepage(list.get(i));
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        parseArticlepage(alist.get(i));
                 }
             }
 
             @Override
             public void onError(BmobException e) {
-
+                queryArticles();
             }
         });
+    }
+
+    public void checkPieceSize() {
+        synchronized (this) {
+            pieceSize--;
+            if (pieceSize==0) {
+                message("本批次全部完成，启动下一轮查询");
+                alist.clear();
+                pieceNum++;
+                queryArticles();
+            }
+        }
     }
 }

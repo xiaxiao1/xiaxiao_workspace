@@ -52,7 +52,7 @@ import java.util.ArrayList;
  */
 public class RuntimePermissionsManager {
     private Activity activity;
-    private int requestCode=8888;
+    private int requestCode=1111;
     private RequestCallback requestCallback;
 
     /**

@@ -148,6 +148,26 @@ public class BmobServer {
         });
     }
 
+    public void updateArticle(final Article article) {
+//        showWaitDialog();
+        article.update(article.getObjectId(), new UpdateListener() {
+            @Override
+            public void done(BmobException e) {
+                if (e == null) {
+                    Util.L("update ok.");
+                    handleSuccess(article.getObjectId());
+                } else {
+                    Util.L("update error:"+e.getMessage()+" errorCode:"+e.getErrorCode());
+                    handleError(e);
+                }
+            }
+        });
+    }
+    public void updateArticle(final Article article, final BmobListener bmobListener) {
+        addListener(bmobListener);
+        updateArticle(article);
+    }
+
     public void addArticleInfo(final ArticleInfo articleInfo) {
         showWaitDialog();
         articleInfo.save(new SaveListener<String>() {
@@ -168,6 +188,8 @@ public class BmobServer {
         addListener(bmobListener);
         addArticleInfo(articleInfo);
     }
+
+
 
 //    /**
 //     * add o book
@@ -357,16 +379,18 @@ public class BmobServer {
         });
     }*/
 
-    public void getArticles(BmobListener bmobListener) {
+    public void getArticles(int skipNum,BmobListener bmobListener) {
         addListener(bmobListener);
         mBmobQuery = new BmobQuery<Article>();
-        mBmobQuery.order("-createdAt");
-        mBmobQuery.setLimit(10);
-        showWaitDialog();
+//        mBmobQuery.order("-createdAt");
+        mBmobQuery.addWhereEqualTo("contents", null);
+        mBmobQuery.setLimit(100);
+        mBmobQuery.setSkip(skipNum*100);
+//        showWaitDialog();
         mBmobQuery.findObjects(new FindListener<Article>() {
             @Override
             public void done(List<Article> list, BmobException e) {
-                dismissWaitDialog();
+//                dismissWaitDialog();
                 if (e == null) {
                     Util.L("query ok.");
                     handleSuccess(list);

@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:hint="start page"
         android:layout_weight="1"
-        android:inputType="number"
+        android:inputType="phone"
         />
     <EditText
         android:id="@+id/tv_end"
