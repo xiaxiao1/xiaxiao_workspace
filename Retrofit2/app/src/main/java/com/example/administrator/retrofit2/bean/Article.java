@@ -12,6 +12,7 @@ public class Article extends BmobObject{
     String publishTime;
     MyUser writer;
     String contents;
+    int havecontent;
 
 
     public String getUrl() {
@@ -52,6 +53,14 @@ public class Article extends BmobObject{
 
     public void setContents(String contents) {
         this.contents = contents;
+    }
+
+    public int getHavecontent() {
+        return havecontent;
+    }
+
+    public void setHavecontent(int havecontent) {
+        this.havecontent = havecontent;
     }
 
     @Override

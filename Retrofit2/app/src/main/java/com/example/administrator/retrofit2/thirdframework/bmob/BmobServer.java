@@ -21,6 +21,7 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.CountListener;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.QueryListListener;
+import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 import cn.bmob.v3.listener.UploadFileListener;
@@ -189,6 +190,22 @@ public class BmobServer {
         addArticleInfo(articleInfo);
     }
 
+    public void getArticle(String id, final BmobListener bmobListener) {
+        mBmobQuery = new BmobQuery<Article>();
+        mBmobQuery.getObject(id, new QueryListener<Article>() {
+            @Override
+            public void done(Article o, BmobException e) {
+                if (e == null) {
+                    bmobListener.onSuccess(o);
+                } else {
+                    bmobListener.onError(e);
+                }
+            }
+
+
+        });
+
+    }
 
 
 //    /**
@@ -382,8 +399,10 @@ public class BmobServer {
     public void getArticles(int skipNum,BmobListener bmobListener) {
         addListener(bmobListener);
         mBmobQuery = new BmobQuery<Article>();
-//        mBmobQuery.order("-createdAt");
-        mBmobQuery.addWhereEqualTo("contents", null);
+        BmobQuery<Article> q1 = new BmobQuery<Article>();
+        mBmobQuery.addWhereEqualTo("contents", "");
+        mBmobQuery.order("-createdAt");
+//        mBmobQuery.addWhereNotEqualTo("havecontent",1);
         mBmobQuery.setLimit(100);
         mBmobQuery.setSkip(skipNum*100);
 //        showWaitDialog();

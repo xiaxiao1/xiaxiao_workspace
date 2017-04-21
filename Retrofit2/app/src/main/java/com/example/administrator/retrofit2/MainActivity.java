@@ -2,13 +2,14 @@ package com.example.administrator.retrofit2;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -17,13 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.retrofit2.bean.Article;
-import com.example.administrator.retrofit2.bean.ArticleInfo;
-import com.example.administrator.retrofit2.thirdframework.bmob.BmobIniter;
 import com.example.administrator.retrofit2.thirdframework.bmob.BmobListener;
 import com.example.administrator.retrofit2.thirdframework.bmob.BmobServer;
 import com.example.administrator.retrofit2.thirdframework.retrofit.gitapi;
 import com.example.administrator.retrofit2.util.RuntimePermissionsManager;
-import com.squareup.okhttp.ResponseBody;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,15 +36,19 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.bmob.v3.Bmob;
-import cn.bmob.v3.BmobObject;
 import cn.bmob.v3.exception.BmobException;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    List<Article> saveArticles= new CopyOnWriteArrayList<>();
     public int pieceSize;
     int totalitems;
     public int pieceNum=0;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     Uri notification2 ;
     Ringtone r ;
     Ringtone r2 ;
+    OkHttpClient client;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +83,20 @@ public class MainActivity extends AppCompatActivity {
 //        BmobIniter.init(this);
 
         Bmob.initialize(getApplicationContext(), "2f0b843f4fa2d170216ff309cc123300");
+        addHeader();
+        t_retrofit =new Retrofit.Builder()
+                .baseUrl(API)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(addHeader())
+                .build();
+        t_service = t_retrofit.create(gitapi.class);
         bmobServer = new BmobServer.Builder(getApplicationContext()).enableDialog(false).build();
+        findViewById(R.id.btn2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,Activity2.class));
+            }
+        });
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,18 +121,54 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });*/
 
+
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         queryArticles();
                     }
                 }).start();
+
+//                editArticles();
             }
         });
 
 
 
 
+    }
+
+    public void editArticles() {
+        bmobServer.getArticles(pieceNum,new BmobListener() {
+            @Override
+            public void onSuccess(Object object) {
+                alist=(List<Article>)object;
+                for (Article f:alist) {
+                    if (f.getContents() .length()>1) {
+                        f.setHavecontent(1);
+                    } else {
+                        f.setHavecontent(0);
+                    }
+                    saveArticles.add(f);
+                }
+                if (alist.size() > 0) {
+                    pieceNum++;
+                    editArticles();
+                } else {
+//                    saveAsCSV(saveArticles);
+                    updateArticles(saveArticles);
+                }
+
+
+                message("---------------------------------------------------------------请求成功，开始解析文章内容");
+
+            }
+
+            @Override
+            public void onError(BmobException e) {
+            }
+        });
     }
 
     public void work(final int  pageIndex) {
@@ -128,8 +180,18 @@ public class MainActivity extends AppCompatActivity {
         gitapi service = retrofit.create(gitapi.class);
         Call<ResponseBody> model = service.profilePicture(realUrl+(pageIndex*12));
         model.enqueue(new Callback<ResponseBody>() {
+            /*@Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+            }*/
+
+           /* @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }*/
+
             @Override
-            public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
                     if (response==null||response.body()==null) {
                         message("----------------------------------------------------第 "+pageIndex+" 个列表页出错");
@@ -166,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("xx",""+t.getMessage());
                 currentListSize=ListSize-1;
                 errorPageIndex.add(pageIndex + 1);
@@ -174,19 +236,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    Retrofit t_retrofit =new Retrofit.Builder().baseUrl(API).addConverterFactory(GsonConverterFactory.create()).build();
-    gitapi t_service = t_retrofit.create(gitapi.class);
+    Retrofit t_retrofit;
+    gitapi t_service ;
     public void parseArticlepage(final Article article) {
         final String pageUrl=article.getUrl();
-        message("-------------------------------------------------------------------------------正在处理 "+pageUrl);
-
         Call<ResponseBody> model = t_service.profilePicture(pageUrl);
+
         model.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Response<ResponseBody> response, Retrofit retrofit) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 try {
                     if (response==null||response.body()==null) {
-                        message("------------------------------------------------------------------"+pageUrl+" 页出错");
+                        message("------------------------------------------------------------------"+pageUrl+" 页出错  "+response.errorBody().string()+response.code());
 //                        errorArticles.add(article);
 //                        checkArticleList();
                         checkPieceSize();
@@ -234,6 +300,11 @@ public class MainActivity extends AppCompatActivity {
 //                    articleInfo.setContents(stringBuffer.toString());
                     message("解析文章内容完成，开始存入bmob");
                     article.setContents(stringBuffer.toString());
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     bmobServer.updateArticle(article, new BmobListener() {
                         @Override
                         public void onSuccess(Object object) {
@@ -247,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 //                    checkArticleList();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
 //                    checkArticleList();
                     checkPieceSize();
@@ -257,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("xx",""+t.getMessage());
 //                currentListSize=ListSize-1;
 //                checkArticleList();
@@ -406,15 +477,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void updateArticles(List<Article> list) {
+        for (Article aa:list) {
+            bmobServer.updateArticle(aa);
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
     public void saveAsCSV(List<Article> list) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("name,url\r\n");
+        buffer.append("name,url,contents,havecontent\r\n");
         for(Article a:list){
-            buffer.append(a.getName()+","+a.getUrl()+"\r\n");
+            buffer.append(a.getName()+","+a.getUrl()+a.getContents()+a.getHavecontent()+"\r\n");
         }
         try {
-//              String data =new String(buffer.toString().getBytes("utf-8"), "ansi") ;
-            String data = buffer.toString();
+              String data =new String(buffer.toString().getBytes("utf-8"), "utf-8") ;
+//            String data = buffer.toString();
 
             String filename = "用户名单_qwqw.csv";
 
@@ -461,12 +543,12 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(Object object) {
                 alist=(List<Article>)object;
                 List<Article> tempList=(List<Article>)object;
-                for (Article f:alist) {
+                /*for (Article f:alist) {
                     if (f.getContents()!=null) {
                         tempList.add(f);
                     }
                 }
-                alist=tempList;
+                alist=tempList;*/
                 pieceSize=alist.size();
                 if (alist.size()==0) {
                     message("---------------------------------------------------------------本次结束 ，共操作条数"+totalitems);
@@ -474,15 +556,16 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 totalitems=totalitems+pieceSize;
-                message("---------------------------------------------------------------请求成功，开始解析文章内容");
+                message("---------------------------------------------------------------请求成功，开始解析文章内容 "+pieceNum);
                 for (int i=0;i<alist.size();i++) {
 //                    message(list.get(i).toString());
 
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+                    message("-------------------------------------------------------------------------------正在处理 "+alist.get(i).getUrl()+"  "+i+" : "+pieceNum);
                         parseArticlepage(alist.get(i));
                 }
             }
@@ -505,4 +588,49 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
+    public OkHttpClient addHeader() {
+
+
+               OkHttpClient httpClient = new OkHttpClient.Builder()
+
+                      .addInterceptor(new Interceptor() {
+
+                              @Override
+
+                              public okhttp3.Response intercept(Chain chain) throws IOException {
+
+                                      Request request = chain.request()
+
+                                               .newBuilder()
+
+                                              .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+                                              .addHeader("Accept-Encoding", "gzip, deflate")
+
+                                              .addHeader("Connection", "keep-alive")
+
+                                              .addHeader("Accept", "*/*")
+
+                                              .addHeader("Cookie", "add cookies here")
+
+                                              .build();
+
+                                      return chain.proceed(request);
+
+                                  }
+
+
+
+                                })
+
+                         .build();
+
+                 return httpClient;
+
+                 }
+
+
+
 }
