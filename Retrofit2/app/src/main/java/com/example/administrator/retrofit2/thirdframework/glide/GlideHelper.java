@@ -18,6 +18,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
+import com.example.administrator.retrofit2.R;
 import com.example.administrator.retrofit2.util.Util;
 
 import java.io.File;
@@ -31,13 +32,21 @@ import java.io.OutputStream;
  */
 public class GlideHelper {
 
+    SimpleTarget<Bitmap> bitmapSimpleTarget=new SimpleTarget<Bitmap>() {
+        @Override
+        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+
+        }
+    };
+
     public static void loadImage(Context context, String url, ImageView imageView) {
         Glide.with(context)
                 .load(url)
+                .error(R.drawable.error)
                 .into(imageView);
 
     }
-    public static void loadGifImage(final Context context, String url, final ImageView imageview) {
+    public static void loadGifImage(final Context context, String url, final ImageView imageview, final OnGlideGIFListener onGlideGIFListener) {
         Glide.with(context)
                 .load(url)
 //                .crossFade()
@@ -46,95 +55,53 @@ public class GlideHelper {
                 .into(new SimpleTarget<byte[]>() {
                     @Override
                     public void onResourceReady(byte[] resource, GlideAnimation<? super byte[]> glideAnimation) {
-                        File f = new File(Environment.getExternalStorageDirectory(), "sss.gif");
+                        if (resource==null||resource.length<1) {
+                            onGlideGIFListener.failed();
+                            return;
+                        }
+                        File f = new File(Environment.getExternalStorageDirectory(), System.currentTimeMillis()+"sss.gif");
                         if (!f.exists()) {
                             try {
                                 f.createNewFile();
+                                OutputStream out= null;
+                                out = new FileOutputStream(f);
+                                out.write(resource);
+                                out.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
+                                Util.L("save file error:"+e.getMessage());
                             }
                         }
-                        OutputStream out= null;
-                        try {
-                            out = new FileOutputStream(f);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                        onGlideGIFListener.success(f);
 
-
-                        try {
-                            out.write(resource);
-                            out.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                         Glide.with(context)
                                 .load(f)
                                 .asGif()
+                                .error(R.drawable.error)
                                 .into(imageview);
 
                     }
                 });
 
     }
-    public static void loadImageAsBitmap(Context context, String url, final OnGlideListener onGlideListener) {
+    public static void loadImageAsBitmap(Context context, String url, final ImageView img, final OnGlidePNGListener onGlidePNGListener) {
         Glide.with(context)
                 .load(url)
                 .asBitmap()
-.diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//.diskCacheStrategy(DiskCacheStrategy.SOURCE)
 
-                .into(new Target<Bitmap>() {
-            @Override
-            public void onLoadStarted(Drawable placeholder) {
-
-            }
-
-            @Override
-            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                onGlideListener.onFailed(e, null, null, false);
-            }
-
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                //TODO set bitmap
-                onGlideListener.onResourceReady(resource,null,null,false,false);
-            }
-
-            @Override
-            public void onLoadCleared(Drawable placeholder) {
-
-            }
-
-            @Override
-            public void getSize(SizeReadyCallback cb) {
-
-            }
-
-            @Override
-            public void setRequest(Request request) {
-
-            }
-
-            @Override
-            public Request getRequest() {
-                return null;
-            }
-
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onStop() {
-
-            }
-
-            @Override
-            public void onDestroy() {
-
-            }
-        });
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        if (resource==null) {
+                            onGlidePNGListener.failed();
+                            img.setImageResource(R.drawable.error);
+                            return;
+                        }
+                        img.setImageBitmap(resource);
+                        onGlidePNGListener.success(resource);
+                    }
+                });
 
     }
     public static void loadImage(Context context, String url, ImageView imageView,int defaultResId) {

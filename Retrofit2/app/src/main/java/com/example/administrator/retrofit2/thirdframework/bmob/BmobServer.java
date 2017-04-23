@@ -10,6 +10,8 @@ import com.example.administrator.retrofit2.util.UIDialog;
 import com.example.administrator.retrofit2.util.Util;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cn.bmob.v3.BmobBatch;
@@ -190,9 +192,25 @@ public class BmobServer {
         addArticleInfo(articleInfo);
     }
 
-    public void getArticle(String id, final BmobListener bmobListener) {
+    int[] havecontentValue={2,3};
+    public void getArticle( final BmobListener bmobListener) {
         mBmobQuery = new BmobQuery<Article>();
-        mBmobQuery.getObject(id, new QueryListener<Article>() {
+
+        mBmobQuery.addWhereNotContainedIn("havecontent", Arrays.asList(havecontentValue));
+//        mBmobQuery.and(queries);
+        mBmobQuery.setLimit(1);
+        mBmobQuery.order("-contents");
+        mBmobQuery.findObjects(new FindListener<Article>(){
+            @Override
+            public void done(List<Article> list, BmobException e) {
+                if (e == null&&list.size()>0) {
+                    bmobListener.onSuccess(list.get(0));
+                } else {
+                    bmobListener.onError(e);
+                }
+            }
+        });
+        /*mBmobQuery.getObject(id, new QueryListener<Article>() {
             @Override
             public void done(Article o, BmobException e) {
                 if (e == null) {
@@ -203,7 +221,7 @@ public class BmobServer {
             }
 
 
-        });
+        });*/
 
     }
 
@@ -420,14 +438,15 @@ public class BmobServer {
             }
         });
     }
-    public void upFile(File file,BmobListener bmobListener) {
+    public void upFile(File file,int index,BmobListener bmobListener) {
         addListener(bmobListener);
-        showWaitDialog();
+//        showWaitDialog();
         final BmobFile bmobFile = new BmobFile(file);
+
         bmobFile.uploadblock(new UploadFileListener() {
             @Override
             public void done(BmobException e) {
-                dismissWaitDialog();
+//                dismissWaitDialog();
                 if (e == null) {
                     handleSuccess(bmobFile);
                 } else {

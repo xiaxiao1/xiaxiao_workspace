@@ -37,15 +37,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.exception.BmobException;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+//import okhttp3.Interceptor;
+//import okhttp3.OkHttpClient;
+//import okhttp3.Request;
+//import okhttp3.ResponseBody;
+//import retrofit2.Call;
+//import retrofit2.Callback;
+//import retrofit2.Response;
+//import retrofit2.Retrofit;
+//import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     List<Article> saveArticles= new CopyOnWriteArrayList<>();
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     Uri notification2 ;
     Ringtone r ;
     Ringtone r2 ;
-    OkHttpClient client;
+//    OkHttpClient client;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,13 +83,13 @@ public class MainActivity extends AppCompatActivity {
 //        BmobIniter.init(this);
 
         Bmob.initialize(getApplicationContext(), "2f0b843f4fa2d170216ff309cc123300");
-        addHeader();
-        t_retrofit =new Retrofit.Builder()
+//        addHeader();
+     /*   t_retrofit =new Retrofit.Builder()
                 .baseUrl(API)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(addHeader())
+//                .client(addHeader())
                 .build();
-        t_service = t_retrofit.create(gitapi.class);
+        t_service = t_retrofit.create(gitapi.class);*/
         bmobServer = new BmobServer.Builder(getApplicationContext()).enableDialog(false).build();
         findViewById(R.id.btn2).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,12 +123,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                new Thread(new Runnable() {
+           /*     new Thread(new Runnable() {
                     @Override
                     public void run() {
                         queryArticles();
                     }
-                }).start();
+                }).start();*/
 
 //                editArticles();
             }
@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+/*
 
     public void editArticles() {
         bmobServer.getArticles(pieceNum,new BmobListener() {
@@ -180,15 +181,19 @@ public class MainActivity extends AppCompatActivity {
         gitapi service = retrofit.create(gitapi.class);
         Call<ResponseBody> model = service.profilePicture(realUrl+(pageIndex*12));
         model.enqueue(new Callback<ResponseBody>() {
-            /*@Override
+            */
+/*@Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-            }*/
+            }*//*
 
-           /* @Override
+
+           */
+/* @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
 
-            }*/
+            }*//*
+
 
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -260,9 +265,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                     String html=new String(response.body().bytes());
 //                    tv.setText(html);
-                    /*ArticleInfo articleInfo = new ArticleInfo();
+                    */
+/*ArticleInfo articleInfo = new ArticleInfo();
                     articleInfo.setArticle(article);
-                    articleInfo.setUrl(pageUrl);*/
+                    articleInfo.setUrl(pageUrl);*//*
+
                     Document doc = Jsoup.parse(html);
                     Elements elements=doc.select("div.rich_media_content").first().getElementsByAttributeValue("style","text-align: center;");
                     if (elements.size()==0) {
@@ -354,7 +361,8 @@ public class MainActivity extends AppCompatActivity {
                     message("total over.");
                     message("开始上传文章标题到bmob");
 
-                    /*final List<BmobObject> temps = new CopyOnWriteArrayList<>();
+                    */
+/*final List<BmobObject> temps = new CopyOnWriteArrayList<>();
                     while (articles.size()>0) {
                         try {
                             Thread.sleep(5000);
@@ -393,9 +401,11 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    message("分批上传全部完成");*/
+                    message("分批上传全部完成");*//*
 
-                    /*for (final Article aaa : articles) {
+
+                    */
+/*for (final Article aaa : articles) {
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
@@ -422,13 +432,16 @@ public class MainActivity extends AppCompatActivity {
                                 message("error: "+e.toString());
                             }
                         });
-                    }*/
+                    }*//*
+
 
                     saveAsCSV(articles);
 
-                   /* message("----------------------------------------------------------------开始解析第 "+currentArticleIndex+" / "+articles.size()+"  个文章");
+                   */
+/* message("----------------------------------------------------------------开始解析第 "+currentArticleIndex+" / "+articles.size()+"  个文章");
 
-                    parseArticlepage(articles.get(0));*/
+                    parseArticlepage(articles.get(0));*//*
+
                 }
             }
 
@@ -456,12 +469,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /*Runnable a=new Runnable(){
+    */
+/*Runnable a=new Runnable(){
         @Override
         public void run() {
 
         }
-    };*/
+    };*//*
+
     public void ring(final boolean onDoing) {
         new Thread(new Runnable(){
             @Override
@@ -500,10 +515,12 @@ public class MainActivity extends AppCompatActivity {
 
             String filename = "用户名单_qwqw.csv";
 
-            /*String path = Environment.getExternalStorageDirectory()+"/Users/";
+            */
+/*String path = Environment.getExternalStorageDirectory()+"/Users/";
             if (!new File(path).exists()) {
                 new File(path).mkdirs();
-            }*/
+            }*//*
+
             File file = new File(Environment.getExternalStorageDirectory(), filename);
             if (!file.exists()) {
                 file.createNewFile();
@@ -521,20 +538,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        //    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (runtimePermissionsManager!=null) {
-            runtimePermissionsManager.handle(requestCode, permissions, grantResults);
-        }
-    }
-    public RuntimePermissionsManager getRuntimePermissionManager(Activity activity) {
-        if (runtimePermissionsManager==null) {
-            runtimePermissionsManager = new RuntimePermissionsManager(activity);
-        }
-        return runtimePermissionsManager;
-    }
+
     List<Article> alist;
     public void queryArticles() {
         message("----------------------------------------------------------------------请求文章列表 "+pieceNum);
@@ -543,12 +547,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(Object object) {
                 alist=(List<Article>)object;
                 List<Article> tempList=(List<Article>)object;
-                /*for (Article f:alist) {
+                */
+/*for (Article f:alist) {
                     if (f.getContents()!=null) {
                         tempList.add(f);
                     }
                 }
-                alist=tempList;*/
+                alist=tempList;*//*
+
                 pieceSize=alist.size();
                 if (alist.size()==0) {
                     message("---------------------------------------------------------------本次结束 ，共操作条数"+totalitems);
@@ -611,7 +617,8 @@ public class MainActivity extends AppCompatActivity {
 
                                               .addHeader("Connection", "keep-alive")
 
-                                              .addHeader("Accept", "*/*")
+                                              .addHeader("Accept", "*
+/*")
 
                                               .addHeader("Cookie", "add cookies here")
 
@@ -632,5 +639,22 @@ public class MainActivity extends AppCompatActivity {
                  }
 
 
+*/
 
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        //    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (runtimePermissionsManager!=null) {
+            runtimePermissionsManager.handle(requestCode, permissions, grantResults);
+        }
+    }
+    public RuntimePermissionsManager getRuntimePermissionManager(Activity activity) {
+        if (runtimePermissionsManager==null) {
+            runtimePermissionsManager = new RuntimePermissionsManager(activity);
+        }
+        return runtimePermissionsManager;
+    }
 }

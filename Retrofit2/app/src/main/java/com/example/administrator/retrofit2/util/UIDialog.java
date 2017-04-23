@@ -26,6 +26,10 @@ public class UIDialog {
         progressDialog = ProgressDialog.show(context, "", "等会哦", false, true, null);
         isShow=true;
     }
+    public void showWaitDialog(String message) {
+        progressDialog = ProgressDialog.show(context, message, "等会哦", false, true, null);
+        isShow=true;
+    }
 
     public void dismissWaitDialog() {
         if (isShow) {
