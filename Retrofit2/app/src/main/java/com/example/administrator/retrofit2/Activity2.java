@@ -1,6 +1,8 @@
 package com.example.administrator.retrofit2;
 
 import android.graphics.Bitmap;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.administrator.retrofit2.bean.Article;
 import com.example.administrator.retrofit2.bean.Picture;
 import com.example.administrator.retrofit2.thirdframework.bmob.BmobListener;
@@ -43,6 +46,7 @@ public class Activity2 extends AppCompatActivity  {
     public static final int TYPE_JPEG=1;
     public static final int TYPE_JPG=2;
     public static final int TYPE_PNG=3;
+    public static final int TYPE_NONE=4;
     ImageView img;
     LinearLayout root;
     BmobServer bmobServer;
@@ -55,8 +59,12 @@ public class Activity2 extends AppCompatActivity  {
     Article theArticle;
     Button findBtn;
     Button updateBtn;
+    Button skipBtn;
+    Button deleteBtn;
+
     UIDialog uiDialog;
     List<File> files = new ArrayList<>();
+    Ringtone ring;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,15 +72,18 @@ public class Activity2 extends AppCompatActivity  {
         img = (ImageView) findViewById(R.id.imgg);
         root = (LinearLayout) findViewById(R.id.root);
         bmobServer = new BmobServer.Builder(this).enableDialog(false).build();
+        ring = RingtoneManager.getRingtone(getApplicationContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         updateBtn=((Button)findViewById(R.id.submit));
         findBtn=((Button)findViewById(R.id.btn));
+        skipBtn=((Button)findViewById(R.id.skip));
+        deleteBtn=((Button)findViewById(R.id.delete));
         uiDialog = new UIDialog(this);
-        updateBtn.setEnabled(false);
+//        updateBtn.setEnabled(false);
         updateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 uiDialog.showWaitDialog("正在更新文章，，");
-                updateBtn.setEnabled(false);
+//                updateBtn.setEnabled(false);
                 findBtn.setEnabled(false);
                 picNum = pictureList.size();
                 prepareArticle2();
@@ -97,18 +108,18 @@ public class Activity2 extends AppCompatActivity  {
                         uiDialog.dismissWaitDialog();
                     }
                 });
-                /*GlideHelper.loadImageAsBitmap(Activity2.this, tempUrl, new OnGlideListener() {
-                    @Override
-                    public void onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        img.setImageBitmap(resource);
-                    }
-
-                    @Override
-                    public void onFailed(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
-
-                    }
-                });*/
-//                GlideHelper.loadImage(Activity2.this,tempUrl,img);
+            }
+        });
+        skipBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                skip();
+            }
+        });
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                delete();
             }
         });
     }
@@ -122,33 +133,46 @@ public class Activity2 extends AppCompatActivity  {
         for (int i=0;i< items.length;i++) {
             if (items[i].startsWith("http:")) {
                 addImageView(i, items[i]);
-                message(i+"img");
+                message(i+" add img");
             } else {
                 addTextView(i,items[i]);
-                message(i+"text");
+                message(i+"add text");
             }
         }
         message("add view done");
     }
 
     public void loadPicWithGlide(final int index, String url, final ImageView img) {
-        if (checkPicType(url) == TYPE_GIF) {
+        int urltype=checkPicType(url);
+        if (urltype == TYPE_NONE) {
+            isQuesetComplete();
+            message("not a picture url "+index);
+        }
+        else if (urltype == TYPE_GIF) {
             GlideHelper.loadGifImage(this, url, img, new OnGlideGIFListener() {
                 @Override
                 public void success(File gifFile) {
+                    message("glide pload gif  pic OK ~!"+index);
                     files.add(gifFile);
                     Picture picture = new Picture();
                     picture.setType(Picture.PICTURE_TYPE_GIF);
                     picture.setIndex(index);
                     picture.setGifFile(gifFile);
                     pictureList.add(picture);
+
+                    /*Glide.with(Activity2.this)
+                            .load(gifFile)
+                            .asGif()
+                            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                            .error(R.drawable.error)
+                            .into(img);*/
                     isQuesetComplete();
                 }
 
                 @Override
                 public void failed() {
                     img.setImageResource(R.drawable.error);
-                    message("glide pload gif  pic error: ");
+                    message("glide pload gif  pic error: "+index);
                     isQuesetComplete();
                 }
             });
@@ -159,6 +183,7 @@ public class Activity2 extends AppCompatActivity  {
                 @Override
                 public void success(Bitmap bitmap) {
 //                    saveBitmapFile(bitmap);
+                    message("glide pload png pic OK ~! "+index);
                     Picture picture = new Picture();
                     picture.setType(Picture.PICTURE_TYPE_PNG);
                     picture.setIndex(index);
@@ -170,7 +195,7 @@ public class Activity2 extends AppCompatActivity  {
                 @Override
                 public void failed() {
                     isQuesetComplete();
-                    message("glide pload png pic error: ");
+                    message("glide pload png pic error: "+index);
                 }
             });
         }
@@ -192,9 +217,10 @@ public class Activity2 extends AppCompatActivity  {
         }
         if (type.equals("gif")) {
             return TYPE_GIF;
-        }
-        else {
+        } else if (type.equals("png") || type.equals("jpeg") || type.equals("jpg")) {
             return TYPE_PNG;
+        } else {
+            return TYPE_NONE;
         }
 
     }
@@ -252,7 +278,7 @@ public class Activity2 extends AppCompatActivity  {
 
 
     public File saveBitmapFile(Bitmap bitmap){
-        File file=new File(Environment.getExternalStorageDirectory(),System.currentTimeMillis()+"ss.png");//将要保存图片的路径
+        File file=new File(Environment.getExternalStorageDirectory()+"/miaowu",System.currentTimeMillis()+"ss.png");//将要保存图片的路径
 
         try {
             if (!file.exists()) {
@@ -293,10 +319,11 @@ public class Activity2 extends AppCompatActivity  {
     public void isQuesetComplete() {
         synchronized (this) {
             requestTime--;
+            message("quest ok ! "+theArticle.getObjectId()+" requesttime: "+requestTime);
             if (requestTime==0) {
-                message("quest ok !");
                 updateBtn.setEnabled(true);
                 uiDialog.dismissWaitDialog();
+                ring.play();
             }
         }
     }
@@ -361,7 +388,7 @@ public class Activity2 extends AppCompatActivity  {
             updateArticle();
             return;
         }
-        Picture picture = pictureList.get(0);
+        Picture picture = pictureList.get(pictureList.size()-picNum);
             File f;
             final int index = picture.getIndex();
             if (picture.getType() == Picture.PICTURE_TYPE_GIF) {
@@ -378,7 +405,7 @@ public class Activity2 extends AppCompatActivity  {
                     results[ii] = bmobFile.getFileUrl();
                     message("上传成功一张图片："+ii+"   url:"+bmobFile.getFileUrl());
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -401,7 +428,7 @@ public class Activity2 extends AppCompatActivity  {
     public void isPicUploadComplete() {
         synchronized (this) {
             picNum--;
-            pictureList.remove(0);
+//            pictureList.remove(0);
             message("check picnum :"+picNum);
             if (picNum == 0) {
                 updateArticle();
@@ -424,10 +451,7 @@ public class Activity2 extends AppCompatActivity  {
         if (pictureList.size()<1) {
             theArticle.setHavecontent(3);
         }
-        for (File f:files) {
-            f.delete();
-        }
-        files.clear();
+
         theArticle.setMainContent(stringBuffer.toString());
         message(theArticle.getMainContent());
         bmobServer.updateArticle(theArticle, new BmobListener() {
@@ -436,7 +460,13 @@ public class Activity2 extends AppCompatActivity  {
                 message("update article ok!");
                 uiDialog.dismissWaitDialog();
                 Util.toast(Activity2.this,"本条操作完成，下一条");
-                updateBtn.setEnabled(false);
+                ring.play();
+                for (File f:files) {
+                    f.delete();
+                }
+                files.clear();
+                pictureList.clear();
+//                updateBtn.setEnabled(false);
                 findBtn.setEnabled(true);
                 root.removeAllViews();
             }
@@ -445,11 +475,66 @@ public class Activity2 extends AppCompatActivity  {
             public void onError(BmobException e) {
                 message("update article erro!"+e.getMessage());
                 Util.toast(Activity2.this,"本条操作完成，下一条");
-                updateBtn.setEnabled(false);
+                ring.play();
+                for (File f:files) {
+                    f.delete();
+                }
+                files.clear();
+                pictureList.clear();
+//                updateBtn.setEnabled(false);
                 findBtn.setEnabled(true);
                 root.removeAllViews();
 
             }
         });
+    }
+
+    public void skip() {
+        theArticle.setHavecontent(3);
+        uiDialog.showWaitDialog("正在 跳过");
+        bmobServer.updateArticle(theArticle, new BmobListener() {
+            @Override
+            public void onSuccess(Object object) {
+                uiDialog.dismissWaitDialog();
+                findBtn.setEnabled(true);
+                ok();
+            }
+
+            @Override
+            public void onError(BmobException e) {
+                uiDialog.dismissWaitDialog();
+                findBtn.setEnabled(true);
+                ok();
+            }
+        });
+    }
+
+    public void delete() {
+        uiDialog.showWaitDialog("正在删除");
+        bmobServer.deleteArticle(theArticle, new BmobListener() {
+            @Override
+            public void onSuccess(Object object) {
+                uiDialog.dismissWaitDialog();
+                findBtn.setEnabled(true);
+                ok();
+            }
+
+            @Override
+            public void onError(BmobException e) {
+                uiDialog.dismissWaitDialog();
+                findBtn.setEnabled(true);
+                ok();
+            }
+        });
+    }
+
+    public void ok() {
+        ring.play();
+        for (File f:files) {
+            f.delete();
+        }
+        files.clear();
+        pictureList.clear();
+        root.removeAllViews();
     }
 }

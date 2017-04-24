@@ -25,17 +25,43 @@
         android:visibility="gone"
         />
 
-    <Button
-        android:id="@+id/submit"
+
+    <LinearLayout
+        android:id="@+id/submit_ll"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="提交"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        />
+        >
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="提交"
+            android:layout_weight="1"
+
+            />
+        <Button
+            android:id="@+id/skip"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="跳过"
+            android:layout_weight="1"
+
+            />
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="删除"
+            android:layout_weight="1"
+
+            />
+    </LinearLayout>
     <ScrollView android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/btn"
-        android:layout_above="@id/submit"
+        android:layout_above="@id/submit_ll"
         >
         <LinearLayout
             android:id="@+id/root"

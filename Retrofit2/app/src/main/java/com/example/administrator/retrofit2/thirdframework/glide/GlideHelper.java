@@ -59,7 +59,7 @@ public class GlideHelper {
                             onGlideGIFListener.failed();
                             return;
                         }
-                        File f = new File(Environment.getExternalStorageDirectory(), System.currentTimeMillis()+"sss.gif");
+                        File f = new File(Environment.getExternalStorageDirectory()+"/miaowu", System.currentTimeMillis()+"sss.gif");
                         if (!f.exists()) {
                             try {
                                 f.createNewFile();
@@ -77,6 +77,7 @@ public class GlideHelper {
                         Glide.with(context)
                                 .load(f)
                                 .asGif()
+                                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                                 .error(R.drawable.error)
                                 .into(imageview);
 

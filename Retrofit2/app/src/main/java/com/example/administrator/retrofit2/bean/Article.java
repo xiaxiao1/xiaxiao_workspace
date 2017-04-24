@@ -13,6 +13,13 @@ public class Article extends BmobObject{
     MyUser writer;
     String contents;
     String mainContent;
+    /**
+     * 0 还没有源数据
+     * 1 正常 有源数据
+     * 2 更新完成 且正确
+     * 3 待修复   表示暂时不能 被加载展示
+     *
+     */
     int havecontent;
 
 

@@ -151,6 +151,20 @@ public class BmobServer {
         });
     }
 
+    public void deleteArticle(final Article article, final BmobListener bmobListener) {
+        article.delete(new UpdateListener() {
+            @Override
+            public void done(BmobException e) {
+                if (e == null) {
+                    bmobListener.onSuccess(article);
+                } else {
+                    bmobListener.onError(e);
+                }
+            }
+        });
+
+    }
+
     public void updateArticle(final Article article) {
 //        showWaitDialog();
         article.update(article.getObjectId(), new UpdateListener() {
@@ -192,14 +206,26 @@ public class BmobServer {
         addArticleInfo(articleInfo);
     }
 
-    int[] havecontentValue={2,3};
+
     public void getArticle( final BmobListener bmobListener) {
+        int[] havecontentValue={0,1};
+        BmobQuery<Article> b1 = new BmobQuery<>();
+        BmobQuery<Article> b2 = new BmobQuery<>();
+        List<BmobQuery<Article>> bs = new ArrayList<>();
+        b1.addWhereNotEqualTo("contents", "");
+        b2.addWhereLessThanOrEqualTo("havecontent", 1);
+//        b2.addWhereContainedIn("havecontent", Arrays.asList(havecontentValue));
+//        b2.addWhereEqualTo("havecontent", 1);
+//        b2.addWhereEqualTo("mainContent", "");
+        bs.add(b1);
+        bs.add(b2);
         mBmobQuery = new BmobQuery<Article>();
 
-        mBmobQuery.addWhereNotContainedIn("havecontent", Arrays.asList(havecontentValue));
-//        mBmobQuery.and(queries);
+//        mBmobQuery.addWhereNotContainedIn("havecontent", Arrays.asList(havecontentValue));
+//        mBmobQuery.addWhereNotEqualTo("contents", "");
+        mBmobQuery.and(bs);
+//        mBmobQuery.order("-contents");
         mBmobQuery.setLimit(1);
-        mBmobQuery.order("-contents");
         mBmobQuery.findObjects(new FindListener<Article>(){
             @Override
             public void done(List<Article> list, BmobException e) {

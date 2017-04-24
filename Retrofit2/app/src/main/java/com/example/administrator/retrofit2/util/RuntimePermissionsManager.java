@@ -52,7 +52,7 @@ import java.util.ArrayList;
  */
 public class RuntimePermissionsManager {
     private Activity activity;
-    private int requestCode=1111;
+    private int requestCode=12;
     private RequestCallback requestCallback;
 
     /**
@@ -63,7 +63,7 @@ public class RuntimePermissionsManager {
 //            Manifest.permission.READ_SMS,
             Manifest.permission.CAMERA,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     public  RuntimePermissionsManager (Activity activity) {

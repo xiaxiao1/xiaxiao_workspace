@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         r = RingtoneManager.getRingtone(getApplicationContext(), notification);
         r2 = RingtoneManager.getRingtone(getApplicationContext(), notification2);
 //        BmobIniter.init(this);
-
+        getRuntimePermissionManager(MainActivity.this).requestPermissions();
         Bmob.initialize(getApplicationContext(), "2f0b843f4fa2d170216ff309cc123300");
 //        addHeader();
      /*   t_retrofit =new Retrofit.Builder()
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 currentPage=Integer.parseInt(((EditText)findViewById(R.id.tv_start)).getText().toString().trim());
                 totalPage=Integer.parseInt(((EditText)findViewById(R.id.tv_end)).getText().toString().trim());
-                getRuntimePermissionManager(MainActivity.this).requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
 //                ring(true);
 //                work(currentPage);
 //                parseArticlepage("http://chuansong.me/n/1775574245332");
